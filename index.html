@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="A generic generative model for native mesh generation, namely PivotMesh.">
+  <meta name="keywords" content="pivotmesh, mesh generation, native mesh, transformer">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PivotMesh: Generic 3D Mesh Generation via Pivot Vertices Guidance</title>
+
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <!-- <link rel="icon" href="./static/images/favicon.svg"> -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <!-- import model-viewer -->
+  <!-- <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.156.1/build/three.module.js",
+        "three/controls/OrbitControls": "https://unpkg.com/three@0.156.1/examples/jsm/controls/OrbitControls.js",
+        "three/libs/stats": "https://unpkg.com/three@0.156.1/examples/jsm/libs/stats.module.js"
+      }
+    }
+  </script> -->
+  <!-- <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script> -->
+  <!-- <script type="module" src="./static/js/model-viewer.js"></script>
+  <style>
+    model-viewer {
+      width: 300px;
+      height: 300px;
+    }
+  </style>   -->
+
+</head>
+<body>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">PivotMesh: Generic 3D Mesh Generation via Pivot Vertices Guidance</h1>
+          <!-- <h2 class="title is-size-3 publication-title">CVPR 2024</h2> -->
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://whaohan.github.io/">Haohan Weng</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://yikaiw.github.io/">Yikai Wang</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://sites.scut.edu.cn/cs/2021/0317/c22284a422099/page.psp">Tong Zhang</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://www2.scut.edu.cn/cs/2019/0724/c22284a328910/page.htm">C. L. Philip Chen</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://ml.cs.tsinghua.edu.cn/~jun/index.shtml">Jun Zhu</a><sup>23</sup>,
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>South China University of Technology,</span>
+            <span class="author-block"><sup>2</sup>Tsinghua University,</span>
+            <span class="author-block"><sup>3</sup>ShengShu</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="./index.html"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <!-- <span class="link-block">
+                <a href="https://github.com/whaohan/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a> -->
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="content has-text-centered">
+      <video id="replay-video" autoplay="" loop="" muted="" preload="" playsinline="" width="100%">
+        <source src="./static/videos/head.mp4" type="video/mp4">
+      </video>
+    </div>
+    <p>
+      <b>Meshes generated by our method.</b>
+      Different from 3D generation methods based on neural representations like InstantMesh, our methods can generate compact and sharp meshes with much fewer faces when producing similar shapes.
+    </p>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Generating compact and sharply detailed 3D meshes poses a significant challenge for current 3D generative models. 
+            Different from extracting dense meshes from neural representation, some recent works try to model the native mesh distribution (i.e., a set of triangles), which generates more compact results as humans crafted. 
+            However, due to the complexity and variety of mesh topology, these methods are typically limited to small datasets with specific categories and are hard to extend. 
+            In this paper, we introduce a generic and scalable mesh generation framework PivotMesh, which makes an initial attempt to extend the native mesh generation to large-scale datasets. 
+            We employ a transformer-based auto-encoder to encode meshes into discrete tokens and decode them from face level to vertex level hierarchically. 
+            Subsequently, to model the complex typology, we first learn to generate pivot vertices as coarse mesh representation and then generate the complete mesh tokens with the same auto-regressive Transformer. 
+            This reduces the difficulty compared with directly modeling the mesh distribution and further improves the model controllability. 
+            PivotMesh demonstrates its versatility by effectively learning from both small datasets like Shapenet, and large-scale datasets like Objaverse and Objaverse-xl. 
+            Extensive experiments indicate that PivotMesh can generate compact and sharp 3D meshes across various categories, highlighting its great potential for native mesh modeling.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Method</h2>
+    <center><img src="./static/images/method.png" width="80%"/></center>
+    <p>
+      <b>The overall method of PivotMesh.</b> 
+      (a) Triangle mesh sequences are tokenized into mesh tokens and hierarchically decoded from face level to vertex level via our mesh auto-encoder. 
+      (b) The auto-regressive Transformer first learns to generate pivot vertices as coarse mesh representation and then generates the complete mesh tokens in a coarse-to-fine manner.
+    </p>
+  </div>
+</section>
+
+
+<!-- <section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3"><center>Interactable Meshes</center></h2>
+
+    <div class="columns is-centered has-text-centered">
+      <div class="columns is-1 is-multiline is-mobile">
+        <div class="column pb-6 is-one-third">
+          <p>Toy Giraffe</p>
+          <model-viewer src="./static/meshes/1.glb" environment-image="./static/images/pure_grey.png" shadow-intensity="1" orientation="180deg 270deg 180deg" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;" camera-controls="" touch-action="pan-y" ar-status="not-presenting">
+          </model-viewer>
+        </div>
+        <div class="column pb-6 is-one-third"> 
+          <p>Tea Cup</p>
+          <model-viewer src="./static/meshes/2.glb" environment-image="./static/images/pure_grey.png" shadow-intensity="1" orientation="180deg 270deg 180deg" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;" camera-controls="" touch-action="pan-y" ar-status="not-presenting">
+          </model-viewer>
+        </div>
+        <div class="column pb-6 is-one-third"> 
+          <p>Teddy Bear</p>
+          <model-viewer src="./static/meshes/3.glb" environment-image="./static/images/pure_grey.png" shadow-intensity="1" orientation="180deg 270deg 180deg" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;" camera-controls="" touch-action="pan-y" ar-status="not-presenting">
+          </model-viewer>        
+        </div>
+      </div>
+    </div>
+
+    <div class="columns is-centered has-text-centered">
+      <div class="columns is-1 is-multiline is-mobile">
+        <div class="column pb-6 is-one-third">
+          <p>Toy Giraffe</p>
+          <model-viewer src="./static/meshes/1.glb" environment-image="./static/images/pure_grey.png" shadow-intensity="1" orientation="180deg 270deg 180deg" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;" camera-controls="" touch-action="pan-y" ar-status="not-presenting">
+          </model-viewer>
+        </div>
+        <div class="column pb-6 is-one-third"> 
+          <p>Tea Cup</p>
+          <model-viewer src="./static/meshes/2.glb" environment-image="./static/images/pure_grey.png" shadow-intensity="1" orientation="180deg 270deg 180deg" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;" camera-controls="" touch-action="pan-y" ar-status="not-presenting">
+          </model-viewer>
+        </div>
+        <div class="column pb-6 is-one-third"> 
+          <p>Teddy Bear</p>
+          <model-viewer src="./static/meshes/3.glb" environment-image="./static/images/pure_grey.png" shadow-intensity="1" orientation="180deg 270deg 180deg" style="background: linear-gradient(#ffffff, #ada996); overflow-x: hidden;" camera-controls="" touch-action="pan-y" ar-status="not-presenting">
+          </model-viewer>        
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</section> -->
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Experiments</h2>
+
+        <h3 class="title is-4">Unconditional Generation on ShapeNet</h3>
+        <div class="content has-text-centered">
+          <video id="replay-video" autoplay="" loop="" muted="" preload="" playsinline="" width="100%">
+            <source src="./static/videos/shapenet.mp4" type="video/mp4">
+          </video>
+        </div>
+
+
+        <h3 class="title is-4">Unconditional Generation on Objaverse</h3>
+        <div class="content has-text-centered">
+          <video id="replay-video" autoplay="" loop="" muted="" preload="" playsinline="" width="100%">
+            <source src="./static/videos/objaverse.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <h3 class="title is-4">Mesh Generation with Pivot Vertices Guidance</h3>
+        <div class="columns is-1 is-multiline is-mobile">
+          <div class="column pb-0 mb-0 is-half-tablet">
+            <div class="columns is-1 is-multiline is-mobile">
+              <div class="column pb-0 mb-0 is-one-third"><center>Pivot Vertices</center></div>
+              <div class="column pb-0 mb-0 is-one-third"><center>Generated Mesh</center></div>
+              <div class="column pb-0 mb-0 is-one-third"><center>Ground Truth</center></div>
+            </div>
+          </div>
+          <div class="column pb-0 mb-0 is-half-tablet">
+            <div class="columns is-1 is-multiline is-mobile">
+              <div class="column pb-0 mb-0 is-one-third"><center>Pivot Vertices</center></div>
+              <div class="column pb-0 mb-0 is-one-third"><center>Generated Mesh</center></div>
+              <div class="column pb-0 mb-0 is-one-third"><center>Ground Truth</center></div>
+            </div>
+          </div>
+        </div>
+        <div class="content has-text-centered">
+          <video id="replay-video" autoplay="" loop="" muted="" preload="" playsinline="" width="100%">
+            <source src="./static/videos/conditional.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <h3 class="title is-4">Further Applications</h3>
+        <div class="columns is-1 is-multiline is-mobile">
+          <div class="column pb-0 mb-0 is-half-tablet">
+            <div class="columns is-1 is-multiline is-mobile">
+              <div class="column pb-0 mb-0 is-one-third"><center>Reference Mesh</center></div>
+              <div class="column pb-0 mb-0 is-two-thirds"><center>Generated Mesh</center></div>
+            </div>
+          </div>
+          <div class="column pb-0 mb-0 is-half-tablet">
+            <div class="columns is-1 is-multiline is-mobile">
+              <div class="column pb-0 mb-0 is-one-third"><center>Reference Mesh</center></div>
+              <div class="column pb-0 mb-0 is-two-thirds"><center>Generated Mesh</center></div>
+            </div>
+          </div>
+        </div>
+        <div class="columns is-1 is-multiline is-mobile">
+          <div class="column pb-0 mb-0 is-half-tablet">
+            <video id="teaser" autoplay="" muted="" loop="" playsinline="" height="100%">
+              <source src="./static/videos/application-a.mp4" type="video/mp4">
+            </video>
+            <center>(a) Mesh Variation</center>
+          </div>
+          <div class="column pb-0 mb-0 is-half-tablet">
+            <video id="teaser" autoplay="" muted="" loop="" playsinline="" height="100%">
+              <source src="./static/videos/application-b.mp4" type="video/mp4">
+            </video>
+            <center>(b) Coarse Mesh Refinement</center>
+          </div>
+        </div>
+
+        
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>
+      @misc{
+      }
+    </code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            The template is borrowed from <a
+            href="https://github.com/nerfies/nerfies.github.io">nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
