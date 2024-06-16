@@ -6,11 +6,11 @@
 
 Install the packages in `requirements.txt`. The code is tested under CUDA version 12.1.
 
-    ```bash
-    conda create -n pivotmesh python=3.9
-    conda activate pivotmesh
-    pip install -r requirements.txt
-    ```
+```bash
+conda create -n pivotmesh python=3.9
+conda activate pivotmesh
+pip install -r requirements.txt
+```
 
 ### Training
 
