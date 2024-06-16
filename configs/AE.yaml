@@ -1,0 +1,35 @@
+exp_name: AE-objaverse
+
+# model related
+dataset_name: objaverse
+encoder_dim: 512
+decoder_fine_dim: 256
+dim_codebook: 256
+graph_layers: 1
+patch_size: 1
+encoder_depth: 12
+bin_smooth_blur_sigma: 0.4
+quant_bit: 7
+use_residual_lfq: False
+num_quantizers: 2
+quant_face: False
+codebook_size: 16384
+num_discrete_coors: 128
+
+# training realted
+batch_size: 64
+learning_rate: 1.0e-4
+warmup_steps: 1000
+weight_decay: 0.
+max_grad_norm: 0.5
+dropout: 0.
+resume: null
+grad_accum_every: 1
+num_train_steps: 50000
+val_every: 100
+checkpoint_every: 5000
+augment_dict:
+  scale_min: 0.95
+  scale_max: 1.05
+  rotation: 1
+  jitter_strength: 0.01

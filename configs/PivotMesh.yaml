@@ -1,0 +1,32 @@
+exp_name: PivotMesh-objaverse
+
+# model related
+mode: vertices
+dim: 1024
+depth: 24
+quant_bit: 7
+pivot_rate: 0.1
+pivot_path: null
+dataset_name: objaverse
+quant_bit: 7
+model_path: checkpoints/AE-objaversexl/mesh-autoencoder.ckpt.72.pt
+codes_path: null
+max_seq_len: 3100
+
+# training realted
+batch_size: 12
+learning_rate: 1.0e-4
+warmup_steps: 2000
+weight_decay: 0.
+max_grad_norm: 0.5
+dropout: 0.
+resume: null
+grad_accum_every: 1
+num_train_steps: 200000
+val_every: 100
+checkpoint_every: 5000
+augment_dict:
+  scale_min: 0.95
+  scale_max: 1.05
+  rotation: 1
+  jitter_strength: 0.01
